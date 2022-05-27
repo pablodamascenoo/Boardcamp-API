@@ -19,19 +19,6 @@ export async function verifyCustomerBody(req, res, next) {
             : res.sendStatus(422);
     }
 
-    try {
-        const response = await connection.query(
-            `SELECT * FROM customers WHERE cpf=$1`,
-            [cpf]
-        );
-        if (response.rows.length) {
-            return res.sendStatus(409);
-        }
-    } catch (e) {
-        failure(e);
-        return res.sendStatus(500);
-    }
-
     res.locals.customer = { ...value };
     next();
 }
@@ -39,15 +26,19 @@ export async function verifyCustomerBody(req, res, next) {
 export async function cpfExists(req, res, next) {
     const { id } = req.params;
     const { cpf } = res.locals.customer;
+    let query;
 
     try {
-        if (
-            await connection.query(
-                `SELECT * FROM customers WHERE id != $1 AND cpf = $2`,
-                [id, cpf]
-            ).rowCount
-        )
-            return res.sendStatus(409);
+        id
+            ? (query = await connection.query(
+                  `SELECT * FROM customers WHERE id != $1 AND cpf = $2`,
+                  [id, cpf]
+              ))
+            : (query = await connection.query(
+                  `SELECT * FROM customers WHERE cpf = $1`,
+                  [cpf]
+              ));
+        if (query.rowCount) return res.sendStatus(409);
     } catch (e) {
         failure(e);
         return res.sendStatus(500);

@@ -43,3 +43,29 @@ export async function getUser(req, res) {
         res.sendStatus(500);
     }
 }
+
+export async function updateUser(req, res) {
+    const { id } = res.locals;
+    const { name, phone, cpf, birthday } = res.locals.customer;
+
+    try {
+        await connection.query(
+            `
+        UPDATE
+         customers
+        SET
+         name = $1,
+         phone = $2,
+         cpf = $3,
+         birthday = $4
+        WHERE
+         id = $5 `,
+            [name, phone, cpf, birthday, id]
+        );
+        res.sendStatus(200);
+        return;
+    } catch (error) {
+        failure(`${error} update`);
+        res.sendStatus(500);
+    }
+}
