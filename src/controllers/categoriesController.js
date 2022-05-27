@@ -1,5 +1,5 @@
 import connection from "../db.js";
-import { failure } from "../misc/chalkAlerts";
+import { failure } from "../misc/chalkAlerts.js";
 
 export async function postCategorie(req, res) {
     const { name } = res.locals;
