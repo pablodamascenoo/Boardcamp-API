@@ -5,8 +5,6 @@ import connection from "../db.js";
 export async function verifyCustomerBody(req, res, next) {
     const { name, phone, cpf, birthday } = req.body;
 
-    if (isNaN(new Date(birthday).getTime())) return res.sendStatus(400);
-
     const { error, value } = customersSchema.validate({
         name,
         phone,
@@ -15,17 +13,20 @@ export async function verifyCustomerBody(req, res, next) {
     });
 
     if (error) {
-        warning(error);
-        return res.sendStatus(422);
+        let errorKey = JSON.stringify(error.details[0].context.key);
+        return errorKey === '"birthday"'
+            ? res.sendStatus(400)
+            : res.sendStatus(422);
     }
 
     try {
-        if (
-            await connection.query(`SELECT * FROM customers WHERE cpf=$1`, [
-                cpf,
-            ])
-        )
+        const response = await connection.query(
+            `SELECT * FROM customers WHERE cpf=$1`,
+            [cpf]
+        );
+        if (response.rows.length) {
             return res.sendStatus(409);
+        }
     } catch (e) {
         failure(e);
         return res.sendStatus(500);
