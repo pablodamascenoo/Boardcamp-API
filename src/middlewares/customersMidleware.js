@@ -35,3 +35,24 @@ export async function verifyCustomerBody(req, res, next) {
     res.locals.customer = { ...value };
     next();
 }
+
+export async function cpfExists(req, res, next) {
+    const { id } = req.params;
+    const { cpf } = res.locals.customer;
+
+    try {
+        if (
+            await connection.query(
+                `SELECT * FROM customers WHERE id != $1 AND cpf = $2`,
+                [id, cpf]
+            ).rowCount
+        )
+            return res.sendStatus(409);
+    } catch (e) {
+        failure(e);
+        return res.sendStatus(500);
+    }
+
+    res.locals.id = id;
+    next();
+}
