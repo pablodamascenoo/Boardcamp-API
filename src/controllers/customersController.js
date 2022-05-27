@@ -25,3 +25,18 @@ export async function postUser(req, res) {
         return res.sendStatus(500);
     }
 }
+
+export async function getUser(req, res) {
+    const { id } = req.params;
+
+    try {
+        const users = await connection.query(
+            `SELECT * FROM customers WHERE id=$1`,
+            [id]
+        );
+        res.status(200).send(users.rows[0]);
+    } catch (error) {
+        failure(error);
+        res.sendStatus(500);
+    }
+}
