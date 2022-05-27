@@ -1,4 +1,4 @@
-import chalk from "chalk";
+import { warning, failure, success } from "../misc/chalkAlerts.js";
 import connection from "../db.js";
 
 export async function getUsers(req, res) {
@@ -6,7 +6,22 @@ export async function getUsers(req, res) {
         const users = await connection.query("SELECT * FROM customers");
         res.status(200).send(users.rows);
     } catch (error) {
-        console.log(chalk.bold.red(error));
+        failure(error);
         res.sendStatus(500);
+    }
+}
+
+export async function postUser(req, res) {
+    const { name, phone, cpf, birthday } = res.locals.customer;
+
+    try {
+        await connection.query(
+            `INSERT INTO customers (name,phone,cpf,birthday) VALUES($1, $2, $3, $4)`,
+            [name, phone, cpf, birthday]
+        );
+        return res.sendStatus(201);
+    } catch (error) {
+        failure(error);
+        return res.sendStatus(500);
     }
 }
