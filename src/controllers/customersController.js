@@ -34,7 +34,10 @@ export async function getUser(req, res) {
             `SELECT * FROM customers WHERE id=$1`,
             [id]
         );
-        res.status(200).send(users.rows[0]);
+
+        if (!users.rowCount) return res.sendStatus(404);
+
+        return res.status(200).send(users.rows[0]);
     } catch (error) {
         failure(error);
         res.sendStatus(500);
