@@ -1,5 +1,5 @@
 import connection from "../db.js";
-import { failure } from "../misc/chalkAlerts.js";
+import { failure, warning } from "../misc/chalkAlerts.js";
 import gamesSchema from "../schemas/gamesSchema.js";
 
 export async function validateGame(req, res, next) {
@@ -8,6 +8,7 @@ export async function validateGame(req, res, next) {
     const { error } = gamesSchema.validate({ ...game });
 
     if (error) {
+        warning(error);
         return res.sendStatus(422);
     }
 
