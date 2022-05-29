@@ -19,7 +19,7 @@ export async function verifyRental(req, res, next) {
             rental.gameId,
         ]);
 
-        let rentals = await db.query(
+        let rentals = await connection.query(
             `SELECT * FROM rentals WHERE "gameId"=$1 AND "returnDate" IS NULL;`,
             [rental.gameId]
         );
@@ -31,11 +31,12 @@ export async function verifyRental(req, res, next) {
         ) {
             return res.sendStatus(400);
         }
+
+        res.locals.price = game.rows[0].pricePerDay;
+        res.locals.rental = rental;
+        next();
     } catch (error) {
         failure(error);
         return res.sendStatus(500);
     }
-
-    res.locals.rental = rental;
-    next();
 }
