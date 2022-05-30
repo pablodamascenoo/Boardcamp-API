@@ -21,11 +21,15 @@ export async function postRental(req, res) {
 }
 
 export async function getRentals(req, res) {
-    const customerId = req.query.customerId
-        ? `"customerId"=${req.query.customerId}`
-        : "1=1";
+    const customerId = req.query.customerId;
+    const gameId = req.query.gameId;
 
-    const gameId = req.query.gameId ? `"gameId"=${req.query.gameId}` : "1=1";
+    if ((customerId && isNaN(customerId * 1)) || (gameId && isNaN(gameId * 1)))
+        return res.status(200).send([]);
+
+    const customerIdQuery = customerId ? `"customerId"=${customerId}` : "1=1";
+
+    const gameIdQuery = gameId ? `"gameId"=${gameId}` : "1=1";
 
     try {
         const rentals = await connection.query(
@@ -34,7 +38,7 @@ export async function getRentals(req, res) {
         FROM rentals
         JOIN customers ON customers.id = rentals."customerId"
         JOIN games ON games.id = rentals."gameId"
-        JOIN categories ON categories.id = games."categoryId" WHERE ${customerId} AND ${gameId}
+        JOIN categories ON categories.id = games."categoryId" WHERE ${customerIdQuery} AND ${gameIdQuery}
         `
         );
 
