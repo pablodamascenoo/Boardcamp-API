@@ -95,3 +95,15 @@ export async function returnRental(req, res) {
         return res.sendStatus(500);
     }
 }
+
+export async function deleteRental(req, res) {
+    const { id } = res.locals;
+
+    try {
+        await connection.query("DELETE FROM rentals WHERE id=$1", [id]);
+        return res.sendStatus(200);
+    } catch (error) {
+        failure(error);
+        return res.sendStatus(500);
+    }
+}
