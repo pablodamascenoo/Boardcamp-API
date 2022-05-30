@@ -73,3 +73,25 @@ export async function getRentals(req, res) {
         return res.sendStatus(500);
     }
 }
+
+export async function returnRental(req, res) {
+    const { id } = res.locals;
+    const { rental } = res.locals;
+    const dayRented = dayjs(rental.rentDate);
+    const pastDays = dayjs().diff(dayRented, "d");
+    const differenceDays = pastDays - rental.daysRented;
+    const pricePerDay =
+        parseInt(rental.originalPrice) / parseInt(rental.daysRented);
+    const delayFee = differenceDays > 0 ? differenceDays * pricePerDay : 0;
+
+    try {
+        await connection.query(
+            `UPDATE rentals SET "returnDate"=$1, "delayFee"=$2 WHERE id=$3 `,
+            [dayjs().format("YYYY-MM-DD"), delayFee, id]
+        );
+        return res.sendStatus(200);
+    } catch (error) {
+        failure(error);
+        return res.sendStatus(500);
+    }
+}
